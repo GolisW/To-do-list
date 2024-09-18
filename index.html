@@ -19,6 +19,75 @@
         <h1>To do list</h1>
       </header>
 
+      <section class="loginOpen" id="loginOpen">
+        <button class="workshopButton" id="openlogin">
+          <i><i class="fa-solid fa-user"></i></i>
+        </button>
+      </section>
+
+      <section class="login" id="login">
+        <div class="login-header">
+          <h2>Welcome back!</h2>
+          <p>Please enter your details</p>
+        </div>
+        <div class="login-input">
+          <div class="loginInput">
+            <input type="email" class="login-description" placeholder="Email" />
+          </div>
+          <div class="loginInput">
+            <input
+              type="password"
+              class="login-description"
+              placeholder="Password"
+            />
+          </div>
+        </div>
+        <div class="login-ok">
+          <button class="loginButton"><p>Log in</p></button>
+          <p>
+            Don't have an account?
+            <button class="button-text" id="go-to-signin">Sign in</button>
+          </p>
+        </div>
+        <div class="login-cat"><img src="Cat-login.svg" alt="cute cat" /></div>
+        <button class="exit" id="button-exit-login">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
+      <section class="signin" id="signin">
+        <div class="login-header">
+          <h2>Create an account</h2>
+          <p>Nice to meet you!</p>
+        </div>
+        <div class="login-input">
+          <div class="loginInput">
+            <input type="text" class="login-description" placeholder="Name" />
+          </div>
+          <div class="loginInput">
+            <input type="email" class="login-description" placeholder="Email" />
+          </div>
+          <div class="loginInput">
+            <input
+              type="password"
+              class="login-description"
+              placeholder="Password"
+            />
+          </div>
+        </div>
+        <div class="login-ok">
+          <button class="loginButton"><p>Sign in</p></button>
+          <p>
+            Already have an account?
+            <button class="button-text" id="go-to-login">Log in</button>
+          </p>
+        </div>
+        <div class="login-cat"><img src="Cat-login.svg" alt="cute cat" /></div>
+        <button class="exit" id="button-exit-signin">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
       <section class="workshop">
         <button class="workshopButton" id="add">
           <i class="fa-solid fa-plus"></i>
@@ -55,7 +124,11 @@
         </template>
       </section>
     </main>
+
+    <div class="cat"><img src="Cat.svg" alt="cute cat" /></div>
+
+    <div class="fog" id="fog"></div>
   </body>
 
-  <script src="js.js"></script>
+  <script src="main.js"></script>
 </html>
