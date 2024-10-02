@@ -184,7 +184,7 @@ h1 {
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 64px;
+  gap: 48px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -245,6 +245,24 @@ h2 {
   background-color: var(--3);
 }
 
+/* POPUP LOGIN AND SIGNIN*/
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+.login form .signin form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
 .login-header {
   display: flex;
   flex-direction: column;
@@ -255,6 +273,20 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.loginInput input:focus {
+  outline: 0;
+}
+
+.login label {
+  display: flex;
+  gap: 6px;
+  margin-top: -10px;
+  font-family: "sniglet", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: var(--5);
 }
 
 .login-ok {

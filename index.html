@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>To Do List</title>
+    <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
     <link rel="stylesheet" href="https://use.typekit.net/aih3gzl.css" />
     <link rel="stylesheet" href="https://use.typekit.net/aih3gzl.css" />
     <script
@@ -30,26 +31,45 @@
           <h2>Welcome back!</h2>
           <p>Please enter your details</p>
         </div>
-        <div class="login-input">
-          <div class="loginInput">
-            <input type="email" class="login-description" placeholder="Email" />
+        <form action="/login" method="POST">
+          <div class="login-input">
+            <div class="loginInput">
+              <input
+                id="email"
+                type="email"
+                name="email"
+                required
+                class="login-description"
+                placeholder="Email"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="loginInput">
+              <input
+                id="password"
+                type="password"
+                name="passowrd"
+                required
+                class="login-description"
+                placeholder="Password"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="remember">
+              <label> <input type="checkbox" />Remember me</label>
+            </div>
           </div>
-          <div class="loginInput">
-            <input
-              type="password"
-              class="login-description"
-              placeholder="Password"
-            />
+          <div class="login-ok">
+            <button type="submit" class="loginButton"><p>Log in</p></button>
+            <p>
+              Don't have an account?
+              <button class="button-text" id="go-to-signin">Sign in</button>
+            </p>
           </div>
+        </form>
+        <div class="login-cat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
         </div>
-        <div class="login-ok">
-          <button class="loginButton"><p>Log in</p></button>
-          <p>
-            Don't have an account?
-            <button class="button-text" id="go-to-signin">Sign in</button>
-          </p>
-        </div>
-        <div class="login-cat"><img src="Cat-login.svg" alt="cute cat" /></div>
         <button class="exit" id="button-exit-login">
           <i class="fa-solid fa-circle-xmark"></i>
         </button>
@@ -60,29 +80,53 @@
           <h2>Create an account</h2>
           <p>Nice to meet you!</p>
         </div>
-        <div class="login-input">
-          <div class="loginInput">
-            <input type="text" class="login-description" placeholder="Name" />
+        <form action="/register" method="POST">
+          <div class="login-input">
+            <div class="loginInput">
+              <input
+                id="username"
+                type="text"
+                name="username"
+                required
+                class="login-description"
+                placeholder="Username"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="loginInput">
+              <input
+                id="email2"
+                type="email"
+                name="email"
+                required
+                class="login-description"
+                placeholder="Email"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="loginInput">
+              <input
+                id="password2"
+                type="password"
+                name="passowrd"
+                required
+                class="login-description"
+                placeholder="Password"
+              />
+              <div class="error"></div>
+            </div>
           </div>
-          <div class="loginInput">
-            <input type="email" class="login-description" placeholder="Email" />
+          <div class="login-ok">
+            <button type="submit" class="loginButton"><p>Sign in</p></button>
+            <p>
+              Already have an account?
+              <button class="button-text" id="go-to-login">Log in</button>
+            </p>
           </div>
-          <div class="loginInput">
-            <input
-              type="password"
-              class="login-description"
-              placeholder="Password"
-            />
-          </div>
+        </form>
+        <div class="login-cat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
         </div>
-        <div class="login-ok">
-          <button class="loginButton"><p>Sign in</p></button>
-          <p>
-            Already have an account?
-            <button class="button-text" id="go-to-login">Log in</button>
-          </p>
-        </div>
-        <div class="login-cat"><img src="Cat-login.svg" alt="cute cat" /></div>
         <button class="exit" id="button-exit-signin">
           <i class="fa-solid fa-circle-xmark"></i>
         </button>
@@ -125,7 +169,7 @@
       </section>
     </main>
 
-    <div class="cat"><img src="Cat.svg" alt="cute cat" /></div>
+    <div class="cat"><img src="images/Cat.svg" alt="cute cat" /></div>
 
     <div class="fog" id="fog"></div>
   </body>
