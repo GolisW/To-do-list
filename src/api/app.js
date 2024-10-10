@@ -1,7 +1,9 @@
 import express from "express";
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import mysql from "mysql";
-
+import cors from "cors";
+import { checkAuth } from "./auth.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -10,10 +12,13 @@ import usersRoutes from "./routes/users.js";
 const app = express();
 const PORT = 5000;
 
+// MIDDLEWARE
 app.use(bodyParser.json());
+app.use(cors());
+app.use(cookieParser());
 
-// MySQL Connection
-export const db = mysql.createConnection({
+// MySQL CONNECTION
+export const db = mysql.createPool({
   host: process.env.MYSQL_HOST,
   port: process.env.MYSQL_PORT,
   user: process.env.MYSQL_USER,
@@ -21,19 +26,17 @@ export const db = mysql.createConnection({
   database: process.env.MYSQL_DATABASE,
 });
 
-// Connect to MySQL
-db.connect((err) => {
-  if (err) {
-    console.error("Error connecting to MySQL: " + err.stack);
-    return;
-  }
-  console.log("Connected to MySQL as ID " + db.threadId);
+// CONNECT TO MySQL
+db.getConnection((err, connection) => {
+  if (err) throw err;
+  console.log("Server connected successful to MySQL: " + connection.threadId);
 });
 
+// ENDPOINTS
 app.use("/users", usersRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hello from Homepage.");
+app.get("/protected", checkAuth, (req, res) => {
+  res.status(200).json({ message: "Authorized!" });
 });
 
 app.listen(PORT, () =>

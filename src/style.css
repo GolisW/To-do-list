@@ -1,0 +1,456 @@
+/* 
+SOAP - font family
+font-family: "soap", sans-serif;
+font-weight: 400;
+font-style: normal;
+
+Sniglet - font family
+font-family: "sniglet", sans-serif;
+font-weight: 400;
+font-style: normal;
+*/
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --1: #2f243a;
+  --2: #774c60;
+  --3: #db8a74;
+  --4: #ddb4ad;
+  --5: #fac9b8;
+  --6: #f5eeec;
+}
+
+body {
+  background-color: var(--3);
+}
+
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin-top: 20px;
+  text-align: center;
+  font-family: "soap", sans-serif;
+  font-size: 128px;
+  letter-spacing: 0.02em;
+  color: var(--1);
+}
+
+.workshop {
+  width: 100%;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.workshopButton {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin: 0 24px;
+  font-size: 20px;
+  color: var(--4);
+  background-color: var(--2);
+  border: 0px;
+  border-radius: 100%;
+  cursor: pointer;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  transition: 0.3s linear;
+}
+
+.workshop i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.workshopButton:hover {
+  font-size: 30px;
+}
+
+.sortDropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdonwContent {
+  display: none;
+  position: absolute;
+  left: 120px;
+  top: -20px;
+  background-color: transparent;
+  min-width: 160px;
+  z-index: 1;
+}
+
+.dropdonwContent button {
+  background-color: var(--3);
+  font-family: "sniglet", sans-serif;
+  font-size: 16px;
+  color: var(--1);
+  padding: 12px 16px;
+  text-align: left;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.dropdonwContent button:hover {
+  color: var(--5);
+}
+
+.sortDropdown:hover .dropdonwContent {
+  display: block;
+}
+
+.list {
+  min-height: 55vh;
+  width: 70vw;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 40px;
+  text-align: center;
+  background-color: var(--5);
+  border-radius: 20px;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.itemCompleted {
+  height: 26px;
+  width: 26px;
+  cursor: pointer;
+}
+
+.itemDescription {
+  flex-grow: 1;
+  padding: 8px 0 8px 12px;
+  width: 70%;
+  font-family: "sniglet", sans-serif;
+  font-size: 24px;
+  background-color: var(--6);
+  border-radius: 10px;
+  border-style: none;
+}
+
+.deleteItem {
+  color: var(--2);
+  font-size: 20px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.deleteItem:hover {
+  color: var(--3);
+}
+
+.itemCompleted:checked + .itemDescription {
+  background-color: var(--5);
+  text-decoration: line-through;
+  text-decoration-color: var(--1);
+}
+
+.cat {
+  position: absolute;
+  top: 118px;
+  left: 310px;
+  z-index: -1;
+}
+
+/* USER PROFILE */
+.loginOpen {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  top: 40px;
+  right: 40px;
+}
+
+.userProfile {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+
+h3 {
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  color: var(--2);
+}
+
+.dropdonwContent.userProfileDropdown {
+  display: none;
+  position: absolute;
+  left: 15px;
+  top: 80px;
+  background-color: transparent;
+  min-width: 160px;
+  z-index: 1;
+}
+
+/* Change Username PopUP */
+.changeUsernamePopUp {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 420px;
+  padding: 86px;
+  background-color: var(--2);
+  border-radius: 40px;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  z-index: 3;
+  overflow: hidden;
+}
+
+.changeUsernamePopUp p {
+  text-align: center;
+  font-family: "sniglet", sans-serif;
+  font-size: 32px;
+  color: var(--5);
+}
+
+/* Delete User PopUP */
+.deleteUserPopUp {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 86px;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 420px;
+  padding: 86px;
+  background-color: var(--2);
+  border-radius: 40px;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  z-index: 3;
+  overflow: hidden;
+}
+
+.deleteUserPopUp p {
+  text-align: center;
+  font-family: "sniglet", sans-serif;
+  font-size: 32px;
+  color: var(--5);
+}
+
+/* LOG IN */
+.login {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1100px;
+  height: 620px;
+  padding: 86px;
+  background-color: var(--2);
+  border-radius: 40px;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  z-index: 3;
+  overflow: hidden;
+}
+
+h2 {
+  text-align: center;
+  font-family: "soap", sans-serif;
+  font-size: 64px;
+  letter-spacing: 0.05em;
+  color: var(--5);
+}
+
+.loginDescription {
+  flex-grow: 1;
+  padding: 8px 0 8px 12px;
+  width: 300px;
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  background-color: var(--6);
+  border-radius: 10px;
+  border-style: none;
+}
+
+.login p {
+  text-align: center;
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  color: var(--5);
+}
+
+.loginButton {
+  width: 300px;
+  background-color: var(--5);
+  border-radius: 10px;
+  border-style: none;
+  cursor: pointer;
+  transition: 0.3s linear;
+}
+
+.loginButton p {
+  padding: 8px 0;
+  text-align: center;
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  color: var(--1);
+}
+
+.loginButton:hover {
+  background-color: var(--3);
+}
+
+/* POPUP LOGIN AND SIGNIN*/
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+}
+
+.login form .signin form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.loginHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.loginInputBox {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loginInput input:focus {
+  outline: 0;
+}
+
+.login label {
+  display: flex;
+  gap: 6px;
+  margin-top: -10px;
+  font-family: "sniglet", sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: var(--5);
+}
+
+.loginOK {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.loginCat {
+  position: absolute;
+  bottom: -5px;
+  right: 0;
+  color: var(--6);
+}
+
+.buttonText {
+  margin-left: 4px;
+  border-style: none;
+  background-color: transparent;
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  color: var(--5);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.exit {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  background-color: transparent;
+  border: none;
+  font-size: 32px;
+  color: var(--5);
+  cursor: pointer;
+  transition: 0.3s linear;
+}
+
+.exit i {
+  pointer-events: none;
+}
+
+.exit:hover {
+  color: var(--3);
+}
+
+.signin {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1100px;
+  height: 620px;
+  padding: 80px;
+  background-color: var(--2);
+  border-radius: 40px;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  z-index: 3;
+  overflow: hidden;
+}
+
+.signin p {
+  text-align: center;
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  color: var(--5);
+}
+
+.signin button p {
+  color: var(--1);
+}
+
+.fog {
+  display: none;
+  z-index: 2;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(8px);
+}

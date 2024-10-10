@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To Do List</title>
+    <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+    <link rel="stylesheet" href="https://use.typekit.net/aih3gzl.css" />
+    <link rel="stylesheet" href="https://use.typekit.net/aih3gzl.css" />
+    <script
+      src="https://kit.fontawesome.com/a738ed0697.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+
+  <body>
+    <main>
+      <!-- HEADER -->
+      <header>
+        <h1>To do list</h1>
+      </header>
+
+      <!-- USER SECTION -->
+      <section class="loginOpen" id="loginOpen">
+        <div class="userProfile" id="userProfile">
+          <h3 id="h3username"></h3>
+          <div class="sortDropdown userProfile" id="userProfileButton">
+            <button class="workshopButton" id="openProfileOptions">
+              <i class="fa-solid fa-gear"></i>
+            </button>
+            <div class="dropdonwContent userProfileDropdown">
+              <button
+                class="profileOptions openPopup"
+                data-open="changeUsernamePopUp"
+              >
+                Change your username
+              </button>
+              <button
+                class="profileOptions openPopup"
+                data-open="deleteUserPopUp"
+              >
+                Delete account
+              </button>
+            </div>
+          </div>
+        </div>
+        <button
+          class="workshopButton openPopup"
+          data-open="login"
+          id="unlogged"
+        >
+          <i><i class="fa-solid fa-user"></i></i>
+        </button>
+      </section>
+
+      <!-- CHANGE USERNAME POPUP -->
+      <section class="changeUsernamePopUp" id="changeUsernamePopUp">
+        <div class="loginHeader">
+          <p>Please enter your new username</p>
+        </div>
+        <form action="" method="PATCH">
+          <div class="loginInputBox">
+            <div class="loginInput">
+              <input
+                id="changeUsernameInput"
+                type="text"
+                name="changeUsernameInput"
+                required
+                class="loginDescription"
+                placeholder="New username"
+              />
+            </div>
+          </div>
+        </form>
+        <button type="submit" class="loginButton" id="submitUsernameChange">
+          <p>Accept changes</p>
+        </button>
+        <div class="loginCat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
+        </div>
+        <button class="exit" data-popup="changeUsernamePopUp">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
+      <!-- DELETE USER POPUP -->
+      <section class="deleteUserPopUp" id="deleteUserPopUp">
+        <div class="loginHeader">
+          <p>Are you sure you want to delete your account?</p>
+        </div>
+        <button type="submit" class="loginButton" id="deleteUserSubmit">
+          <p>Yes, I'm sure</p>
+        </button>
+        <div class="loginCat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
+        </div>
+        <button class="exit" data-popup="deleteUserPopUp">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
+      <!-- LOGIN POPUP -->
+      <section class="login" id="login">
+        <div class="loginHeader">
+          <h2>Welcome back!</h2>
+          <p>Please enter your details</p>
+        </div>
+        <form action="" id="loginForm">
+          <div class="loginInputBox">
+            <div class="loginInput">
+              <input
+                id="email"
+                type="email"
+                name="email"
+                required
+                class="loginDescription"
+                placeholder="Email"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="loginInput">
+              <input
+                id="password"
+                type="password"
+                name="passowrd"
+                required
+                class="loginDescription"
+                placeholder="Password"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="remember">
+              <label> <input type="checkbox" />Remember me</label>
+            </div>
+          </div>
+          <div class="loginOK">
+            <button type="submit" class="loginButton"><p>Log in</p></button>
+            <p>
+              Don't have an account?
+              <button class="buttonText openPopup" data-open="signin">
+                Sign in
+              </button>
+            </p>
+          </div>
+        </form>
+        <div class="loginCat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
+        </div>
+        <button class="exit" data-popup="login">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
+      <!-- SIGNIN POPUP -->
+      <section class="signin" id="signin">
+        <div class="loginHeader">
+          <h2>Create an account</h2>
+          <p>Nice to meet you!</p>
+        </div>
+        <form action="" id="registerForm">
+          <div class="loginInputBox">
+            <div class="loginInput">
+              <input
+                id="username"
+                type="text"
+                name="username"
+                required
+                class="loginDescription"
+                placeholder="Username"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="loginInput">
+              <input
+                id="emailSignin"
+                type="email"
+                name="email"
+                required
+                class="loginDescription"
+                placeholder="Email"
+              />
+              <div class="error"></div>
+            </div>
+            <div class="loginInput">
+              <input
+                id="passwordSignin"
+                type="password"
+                name="password"
+                required
+                class="loginDescription"
+                placeholder="Password"
+              />
+              <div class="error"></div>
+            </div>
+          </div>
+          <div class="loginOK">
+            <button type="submit" class="loginButton" id="submitSignin">
+              <p>Sign in</p>
+            </button>
+            <p>
+              Already have an account?
+              <button class="buttonText openPopup" data-open="login">
+                Log in
+              </button>
+            </p>
+          </div>
+        </form>
+        <div class="loginCat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
+        </div>
+        <button class="exit" data-popup="signin">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
+      <!-- TO DO LIST BUTTONS -->
+      <section class="workshop">
+        <button class="workshopButton" id="add">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+        <button class="workshopButton" id="delete">
+          <i class="fas fa-trash"></i>
+        </button>
+        <div class="sortDropdown">
+          <button class="workshopButton" id="sort">
+            <i class="fa-solid fa-list-ul"></i>
+          </button>
+          <div class="dropdonwContent">
+            <button class="sortOption" data-sort="all">All tasks</button>
+            <button class="sortOption" data-sort="completed">Completed</button>
+            <button class="sortOption" data-sort="notCompleted">
+              Not completed
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIST -->
+      <section class="list">
+        <div id="items"></div>
+        <template id="itemTemplate">
+          <div class="item">
+            <input type="checkbox" class="itemCompleted" />
+            <input
+              type="text"
+              class="itemDescription"
+              placeholder="Make a biscuits..."
+            />
+            <i class="fas fa-trash deleteItem"></i>
+          </div>
+        </template>
+      </section>
+    </main>
+
+    <!-- CAT -->
+    <div class="cat"><img src="images/Cat.svg" alt="cute cat" /></div>
+
+    <!-- FOG ;) -->
+    <div class="fog" id="fog"></div>
+  </body>
+
+  <script src="/src/main.js"></script>
+</html>
