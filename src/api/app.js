@@ -12,10 +12,32 @@ import usersRoutes from "./routes/users.js";
 const app = express();
 const PORT = 5000;
 
-// MIDDLEWARE
+// MIDDLEWARE CORS
 app.use(bodyParser.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5500",
+    credentials: true,
+  })
+);
 app.use(cookieParser());
+
+// Preflight request (OPTIONS)
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:5500");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 // MySQL CONNECTION
 export const db = mysql.createPool({

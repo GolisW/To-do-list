@@ -207,6 +207,7 @@ registerForm.addEventListener("submit", async (e) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -225,13 +226,15 @@ registerForm.addEventListener("submit", async (e) => {
     document.getElementById("unlogged").style.display = "none";
 
     // Username from cookies
-    const cookies = document.cookie.split("; ");
-    const userCookie = cookies.find((cookie) => cookie.startsWith("username="));
-    const usernameFromCookie = userCookie
-      ? userCookie.split("=")[1]
-      : "Unknown User";
+    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+      const [key, value] = cookie.split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
 
-    document.getElementById("h3username").innerText = usernameFromCookie;
+    const usernameFromCookie = cookies["username"] || "Unknown User";
+    document.getElementById("h3username").innerText =
+      "Hi " + usernameFromCookie + "!";
   } catch (error) {
     console.error("Error during registration: ", error.message);
   }
