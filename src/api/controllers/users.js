@@ -35,7 +35,17 @@ export const createUser = (req, res) => {
           console.log(user);
 
           res.cookie("userID", user.UserID, {
-            httpOnly: true,
+            httpOnly: false,
+            secure: false, // true only for HTTPS
+            sameSite: "Lax",
+          });
+          res.cookie("email", user.Email, {
+            httpOnly: false,
+            secure: false, // true only for HTTPS
+            sameSite: "Lax",
+          });
+          res.cookie("password", user.Password, {
+            httpOnly: false,
             secure: false, // true only for HTTPS
             sameSite: "Lax",
           });
@@ -71,15 +81,39 @@ export const loginUser = (req, res) => {
       }
 
       if (results.length === 0) {
-        return res.status(401).send("Invalid email or password");
+        return res.status(401).send("Invalid credentials");
       }
 
       const user = results[0];
+      console.log("User logged in:", user);
 
-      res.cookie("userID", user.UserID, { httpOnly: true, secure: true });
-      res.status(200).json({
+      res.cookie("userID", user.UserID, {
+        httpOnly: false,
+        secure: false, // true only for HTTPS
+        sameSite: "Lax",
+      });
+      res.cookie("email", user.Email, {
+        httpOnly: false,
+        secure: false, // true only for HTTPS
+        sameSite: "Lax",
+      });
+      res.cookie("password", user.Password, {
+        httpOnly: false,
+        secure: false, // true only for HTTPS
+        sameSite: "Lax",
+      });
+      res.cookie("username", user.Username, {
+        httpOnly: false,
+        secure: false, // true only for HTTPS
+        sameSite: "Lax",
+      });
+
+      res.setHeader("Content-Type", "application/json");
+      res.status(201).json({
         message: "Login successful",
-        user: user,
+        user: {
+          username: user.Username,
+        },
       });
     }
   );
@@ -87,13 +121,13 @@ export const loginUser = (req, res) => {
 
 // DELETE USER
 export const deleteUser = (req, res) => {
-  const userID = req.cookies.userID;
+  const userID = req.params.userID;
 
   if (!userID) {
-    return res.status(401).send("Unauthorized: No userID in cookies");
+    return res.status(400).send("Bad Request: No userID provided");
   }
 
-  db.query("DELETE FROM users WHERE userid = ?", [userID], (err, result) => {
+  db.query("DELETE FROM users WHERE UserID = ?", [userID], (err, result) => {
     if (err) {
       console.error("Error executing query: " + err.stack);
       res.status(400).send("Error deleting user");
@@ -111,14 +145,14 @@ export const deleteUser = (req, res) => {
 // UPDATE USERNAME
 export const updateUser = (req, res) => {
   const { username } = req.body;
-  const userID = req.cookies.userID;
+  const userID = req.params.userID;
 
   if (!userID) {
-    return res.status(401).send("Unauthorized: No userID in cookies");
+    return res.status(400).send("Bad Request: No userID provided");
   }
 
   db.query(
-    "UPDATE users SET username = ? WHERE UserID = ?",
+    "UPDATE users SET Username = ? WHERE UserID = ?",
     [username, userID],
     (err, result) => {
       if (err) {

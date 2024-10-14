@@ -242,96 +242,145 @@ registerForm.addEventListener("submit", async (e) => {
 });
 
 // LOGIN
-// let loginForm = document.getElementById("loginForm");
-// loginForm.addEventListener("submit", async (e) => {
-//   e.preventDefault();
+let loginForm = document.getElementById("loginForm");
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-//   let email = document.getElementById("email");
-//   let password = document.getElementById("password");
+  let email = document.getElementById("email");
+  let password = document.getElementById("password");
 
-//   const url = "http://localhost:5000/users/login";
+  const url = "http://localhost:5000/users/login";
 
-//   try {
-//     const data = {
-//       email: email.value,
-//       password: password.value,
-//     };
+  try {
+    const data = {
+      email: email.value,
+      password: password.value,
+    };
 
-//     const response = await fetch(url, {
-//       method: "POST",
-//       mode: "cors",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(data),
-//     });
+    const response = await fetch(url, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      credentials: "include",
+    });
 
-//     if (!response.ok) {
-//       throw new Error(`Response status: ${response.status}`);
-//     }
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Response status: ${response.status} - ${errorText}`);
+    }
 
-//     const json = response.json();
-//     console.log(json);
+    // Receive user data and set up the interface
+    const json = await response.json();
+    console.log(json);
 
-//     redirectToUserPage(json.id);
-//   } catch (error) {
-//     console.error(error.message);
-//   }
-// });
+    // Page change
+    document.getElementById("userProfile").style.display = "flex";
+    document.getElementById("userProfileButton").style.display = "flex";
 
-// function redirectToUserPage(id) {
-//   window.location.href = `/users/${id}`;
-// }
+    document.getElementById("unlogged").style.display = "none";
 
-// CHANGE USERNAME
-// let submitUsernameChange = document.getElementById("submitUsernameChange");
-// submitUsernameChange.addEventListener("click", async (e) => {
-//   e.preventDefault();
+    // Username from cookies
+    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+      const [key, value] = cookie.split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
 
-//   let newUsername = document.getElementById("changeUsernameInput").value;
-//   // let userId = /* Pobierz ID użytkownika
-
-//   try {
-//     const response = await fetch(`/users/${userId}`, {
-//       method: "PATCH",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ username: newUsername }),
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Error: ${response.status}`);
-//     }
-
-//     const data = await response.json();
-//     console.log(data);
-//   } catch (error) {
-//     console.error(error.message);
-//   }
-// });
+    const usernameFromCookie = cookies["username"] || "Unknown User";
+    document.getElementById("h3username").innerText =
+      "Hi " + usernameFromCookie + "!";
+  } catch (error) {
+    console.error("Login error: ", error.message);
+  }
+  closeAllPopups();
+});
 
 // DELETE USER
-// let deleteUserSubmit = document.getElementById("deleteUserSubmit");
+let deleteUserSubmit = document.getElementById("deleteUserSubmit");
 
-// deleteUserSubmit.addEventListener("click", async () => {
-//   // let userId = /* Pobierz ID użytkownika */;
+deleteUserSubmit.addEventListener("click", async () => {
+  // UserId = from cookies
+  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
 
-//   try {
-//     const response = await fetch(`/users/${userId}`, {
-//       method: "DELETE",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//     });
+  const userId = cookies["userID"];
 
-//     if (!response.ok) {
-//       throw new Error(`Response status: ${response.status}`);
-//     }
+  if (!userId) {
+    console.error("No usr ID found in cookies");
+    return;
+  }
 
-//     const data = await response.json();
-//     console.log(data);
-//   } catch (error) {
-//     console.error(error.message);
-//   }
-// });
+  try {
+    const response = await fetch(`http://localhost:5000/users/${userId}`, {
+      method: "DELETE",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const data = await response.text();
+    console.log(data);
+  } catch (error) {
+    console.error("Error deleting user:", error.message);
+  }
+  closeAllPopups();
+});
+
+// CHANGE USERNAME
+let submitUsernameChange = document.getElementById("submitUsernameChange");
+
+submitUsernameChange.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  let newUsername = document.getElementById("changeUsernameInput").value;
+
+  // UserId = from cookies
+  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  const userId = cookies["userID"];
+
+  if (!userId) {
+    console.error("No user ID found in cookies");
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:5000/users/${userId}`, {
+      method: "PATCH",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ username: newUsername }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const data = await response.text();
+    console.log(data);
+
+    document.getElementById("h3username").innerText = "Hi " + newUsername + "!";
+  } catch (error) {
+    console.error(error.message);
+  }
+  closeAllPopups();
+});

@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import mysql from "mysql";
 import cors from "cors";
-import { checkAuth } from "./auth.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -56,10 +55,6 @@ db.getConnection((err, connection) => {
 
 // ENDPOINTS
 app.use("/users", usersRoutes);
-
-app.get("/protected", checkAuth, (req, res) => {
-  res.status(200).json({ message: "Authorized!" });
-});
 
 app.listen(PORT, () =>
   console.log(`Server running on port: http://localhost:${PORT}`)
