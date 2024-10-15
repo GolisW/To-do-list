@@ -1,103 +1,98 @@
 import { db } from "../app.js";
+import bcrypt from "bcrypt";
 
 // CREATE NEW USER
-export const createUser = (req, res) => {
+export const createUser = async (req, res) => {
   const { username, email, password } = req.body;
 
-  console.log(req.body);
+  // Password hashing
+  try {
+    const hash = await bcrypt.hash(password, 11);
 
-  db.query(
-    "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
-    [username, email, password],
-    (err, result) => {
-      if (err) {
-        console.error("Error executing query: " + err.stack);
-        res.status(400).send("Error creating user");
-        return;
-      }
-
-      // Login user
-      db.query(
-        "SELECT * FROM users WHERE email = ?",
-        [email],
-        (err, result) => {
-          if (err) {
-            console.error("Error fetching user: " + err.stack);
-            res.status(500).send("Error fetching user");
-            return;
-          }
-
-          if (result.length === 0) {
-            return res.status(404).send("User not found");
-          }
-
-          const user = result[0];
-          console.log(user);
-
-          res.cookie("userID", user.UserID, {
-            httpOnly: false,
-            secure: false, // true only for HTTPS
-            sameSite: "Lax",
-          });
-          res.cookie("email", user.Email, {
-            httpOnly: false,
-            secure: false, // true only for HTTPS
-            sameSite: "Lax",
-          });
-          res.cookie("password", user.Password, {
-            httpOnly: false,
-            secure: false, // true only for HTTPS
-            sameSite: "Lax",
-          });
-          res.cookie("username", user.Username, {
-            httpOnly: false,
-            secure: false, // true only for HTTPS
-            sameSite: "Lax",
-          });
-
-          res.setHeader("Content-Type", "application/json");
-          res.status(201).json({
-            message: "User created successfully",
-            user: { username: user.Username },
-          });
+    // Enrolling a user in the database
+    db.query(
+      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+      [username, email, hash],
+      (err, result) => {
+        if (err) {
+          console.error("Error executing query: " + err.stack);
+          return res.status(400).send("Error creating user");
         }
-      );
-    }
-  );
+
+        // Login user
+        db.query(
+          "SELECT * FROM users WHERE email = ?",
+          [email],
+          (err, result) => {
+            if (err) {
+              console.error("Error fetching user: " + err.stack);
+              res.status(500).send("Error fetching user");
+              return;
+            }
+
+            if (result.length === 0) {
+              return res.status(404).send("User not found");
+            }
+
+            const user = result[0];
+            console.log(user);
+
+            res.cookie("userID", user.UserID, {
+              httpOnly: false,
+              secure: false, // true only for HTTPS
+              sameSite: "Lax",
+            });
+            res.cookie("username", user.Username, {
+              httpOnly: false,
+              secure: false, // true only for HTTPS
+              sameSite: "Lax",
+            });
+
+            res.setHeader("Content-Type", "application/json");
+            res.status(201).json({
+              message: "User created successfully",
+              user: { username: user.Username },
+            });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error("Error hashing password: " + error.message);
+    return res.status(500).send("Server error");
+  }
 };
 
 // LOGIN USER
 export const loginUser = (req, res) => {
   const { email, password } = req.body;
 
-  db.query(
-    "SELECT * FROM users WHERE email = ? AND password = ?",
-    [email, password],
-    (err, results) => {
+  db.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
+    if (err) {
+      console.error("Error executing query: " + err.stack);
+      return res.status(500).send("Server error");
+    }
+
+    if (results.length === 0) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const user = results[0];
+
+    // User's password = the hashed password in the database?
+    bcrypt.compare(password, user.Password, (err, isMatch) => {
       if (err) {
-        console.error("Error executing query: " + err.stack);
-        res.status(500).send("Server error");
-        return;
+        console.error("Error comparing passwords: " + err.message);
+        return res.status(500).send("Server error");
       }
 
-      if (results.length === 0) {
+      if (!isMatch) {
         return res.status(401).send("Invalid credentials");
       }
 
-      const user = results[0];
       console.log("User logged in:", user);
 
       res.cookie("userID", user.UserID, {
-        httpOnly: false,
-        secure: false, // true only for HTTPS
-        sameSite: "Lax",
-      });
-      res.cookie("email", user.Email, {
-        httpOnly: false,
-        secure: false, // true only for HTTPS
-        sameSite: "Lax",
-      });
-      res.cookie("password", user.Password, {
         httpOnly: false,
         secure: false, // true only for HTTPS
         sameSite: "Lax",
@@ -115,8 +110,8 @@ export const loginUser = (req, res) => {
           username: user.Username,
         },
       });
-    }
-  );
+    });
+  });
 };
 
 // DELETE USER
