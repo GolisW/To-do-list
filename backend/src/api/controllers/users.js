@@ -1,5 +1,10 @@
 import { db } from "../app.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
+
+const secretKey = process.env.JWT_SECRET;
 
 // CREATE NEW USER
 export const createUser = async (req, res) => {
@@ -19,15 +24,14 @@ export const createUser = async (req, res) => {
           return res.status(400).send("Error creating user");
         }
 
-        // Login user
+        // Fetch newly created user
         db.query(
           "SELECT * FROM users WHERE email = ?",
           [email],
           (err, result) => {
             if (err) {
               console.error("Error fetching user: " + err.stack);
-              res.status(500).send("Error fetching user");
-              return;
+              return res.status(500).send("Error fetching user");
             }
 
             if (result.length === 0) {
@@ -35,9 +39,16 @@ export const createUser = async (req, res) => {
             }
 
             const user = result[0];
-            console.log(user);
 
-            res.cookie("userID", user.UserID, {
+            // Generate JWT token
+            const token = jwt.sign(
+              { userID: user.UserID },
+              process.env.JWT_SECRET,
+              { expiresIn: "1h" }
+            );
+
+            // Generate cookies
+            res.cookie("token", token, {
               httpOnly: false,
               secure: false, // true only for HTTPS
               sameSite: "Lax",
@@ -48,10 +59,12 @@ export const createUser = async (req, res) => {
               sameSite: "Lax",
             });
 
-            res.setHeader("Content-Type", "application/json");
-            res.status(201).json({
-              message: "User created successfully",
-              user: { username: user.Username },
+            return res.status(201).json({
+              message: "User created and logged in successfully",
+              token,
+              user: {
+                username: user.Username,
+              },
             });
           }
         );
@@ -90,9 +103,13 @@ export const loginUser = (req, res) => {
         return res.status(401).send("Invalid credentials");
       }
 
-      console.log("User logged in:", user);
+      //JWT
+      const token = jwt.sign({ userID: user.UserID }, secretKey, {
+        expiresIn: "1h",
+      });
 
-      res.cookie("userID", user.UserID, {
+      // Generate cookies
+      res.cookie("token", token, {
         httpOnly: false,
         secure: false, // true only for HTTPS
         sameSite: "Lax",
@@ -103,9 +120,9 @@ export const loginUser = (req, res) => {
         sameSite: "Lax",
       });
 
-      res.setHeader("Content-Type", "application/json");
-      res.status(201).json({
+      return res.status(200).json({
         message: "Login successful",
+        token,
         user: {
           username: user.Username,
         },

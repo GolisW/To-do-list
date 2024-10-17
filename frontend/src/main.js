@@ -1,3 +1,21 @@
+// ____________________FRONTEND FUNCTIONS____________________
+// CLEANING COOKIES
+function cleaning() {
+  // Page change
+  document.getElementById("userProfile").style.display = "none";
+  document.getElementById("userProfileButton").style.display = "none";
+
+  document.getElementById("unlogged").style.display = "inline-block";
+
+  // Remove cookies
+  function deleteCookie(name) {
+    document.cookie = name + "=; Max-Age=0; path=/";
+  }
+
+  deleteCookie("token");
+  deleteCookie("username");
+}
+
 // ____________________WORKSHOP OPTIONS____________________
 
 // ADD ITEM
@@ -124,19 +142,6 @@ refreshList();
 
 const blurr = document.getElementById("fog");
 
-// CLOSE ALL POPUPS
-function closeAllPopups() {
-  const popups = document.querySelectorAll(
-    ".login, .signin, .deleteUserPopUp, .changeUsernamePopUp"
-  );
-
-  popups.forEach((popup) => {
-    popup.style.display = "none";
-  });
-
-  blurr.style.display = "none";
-}
-
 // OPEN POPUP
 function openPopup(event) {
   const button = event.target.closest(".openPopup");
@@ -156,6 +161,19 @@ function openPopup(event) {
 document.querySelectorAll(".openPopup").forEach((button) => {
   button.addEventListener("click", openPopup);
 });
+
+// CLOSE ALL POPUPS
+function closeAllPopups() {
+  const popups = document.querySelectorAll(
+    ".login, .signin, .deleteUserPopUp, .changeUsernamePopUp"
+  );
+
+  popups.forEach((popup) => {
+    popup.style.display = "none";
+  });
+
+  blurr.style.display = "none";
+}
 
 // EXIT POPUP
 function closePopup(event) {
@@ -215,10 +233,6 @@ registerForm.addEventListener("submit", async (e) => {
       throw new Error(`Response status: ${response.status} - ${errorText}`);
     }
 
-    // Receive user data and set up the interface
-    const json = await response.json();
-    console.log(json);
-
     // Page change
     document.getElementById("userProfile").style.display = "flex";
     document.getElementById("userProfileButton").style.display = "flex";
@@ -272,10 +286,6 @@ loginForm.addEventListener("submit", async (e) => {
       throw new Error(`Response status: ${response.status} - ${errorText}`);
     }
 
-    // Receive user data and set up the interface
-    const json = await response.json();
-    console.log(json);
-
     // Page change
     document.getElementById("userProfile").style.display = "flex";
     document.getElementById("userProfileButton").style.display = "flex";
@@ -302,29 +312,38 @@ loginForm.addEventListener("submit", async (e) => {
 let deleteUserSubmit = document.getElementById("deleteUserSubmit");
 
 deleteUserSubmit.addEventListener("click", async () => {
-  // UserId = from cookies
+  // Token from cookie
   let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
     const [key, value] = cookie.split("=");
     acc[key] = value;
     return acc;
   }, {});
 
-  const userId = cookies["userID"];
+  const token = cookies["token"];
 
-  if (!userId) {
-    console.error("No usr ID found in cookies");
+  // UserID from token
+  const arrayToken = token.split(".");
+
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+  if (!tokenPayload.userID) {
+    console.error("No user ID found");
     return;
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/users/${userId}`, {
-      method: "DELETE",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+    const response = await fetch(
+      `http://localhost:5000/users/${tokenPayload.userID}`,
+      {
+        method: "DELETE",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -336,6 +355,7 @@ deleteUserSubmit.addEventListener("click", async () => {
     console.error("Error deleting user:", error.message);
   }
   closeAllPopups();
+  cleaning();
 });
 
 // CHANGE USERNAME
@@ -346,30 +366,39 @@ submitUsernameChange.addEventListener("click", async (e) => {
 
   let newUsername = document.getElementById("changeUsernameInput").value;
 
-  // UserId = from cookies
+  // Token from cookie
   let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
     const [key, value] = cookie.split("=");
     acc[key] = value;
     return acc;
   }, {});
 
-  const userId = cookies["userID"];
+  const token = cookies["token"];
 
-  if (!userId) {
-    console.error("No user ID found in cookies");
+  // UserID from token
+  const arrayToken = token.split(".");
+
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+  if (!tokenPayload.userID) {
+    console.error("No user ID found");
     return;
   }
 
   try {
-    const response = await fetch(`http://localhost:5000/users/${userId}`, {
-      method: "PATCH",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ username: newUsername }),
-    });
+    const response = await fetch(
+      `http://localhost:5000/users/${tokenPayload.userID}`,
+      {
+        method: "PATCH",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({ username: newUsername }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -383,4 +412,13 @@ submitUsernameChange.addEventListener("click", async (e) => {
     console.error(error.message);
   }
   closeAllPopups();
+});
+
+// LOG OUT
+let logoutButton = document.getElementById("logoutUser");
+
+logoutButton.addEventListener("click", async (e) => {
+  e.preventDefault();
+
+  cleaning();
 });
