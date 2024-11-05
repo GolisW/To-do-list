@@ -219,7 +219,11 @@
 
       <!-- TO DO LIST BUTTONS -->
       <section class="workshop">
-        <button class="workshopButton" id="add">
+        <button
+          class="workshopButton openPopup"
+          data-open="addTaskPopUp"
+          id="add"
+        >
           <i class="fa-solid fa-plus"></i>
         </button>
         <button class="workshopButton" id="delete">
@@ -239,6 +243,36 @@
         </div>
       </section>
 
+      <!-- ADD TASK POPUP -->
+      <section class="addTaskPopUp" id="addTaskPopUp">
+        <div class="loginHeader">
+          <p>Your new task:</p>
+        </div>
+        <form action="" method="POST">
+          <div class="loginInputBox">
+            <div class="loginInput">
+              <input
+                id="newTaskInput"
+                type="text"
+                name="newTaskInput"
+                required
+                class="newTaskDescription"
+                placeholder="Make biscuits..."
+              />
+            </div>
+          </div>
+        </form>
+        <button type="submit" class="loginButton" id="submitNewTask">
+          <p>Save new task</p>
+        </button>
+        <div class="loginCat">
+          <img src="images/Cat-login.svg" alt="cute cat" />
+        </div>
+        <button class="exit" data-popup="addTaskPopUp">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </section>
+
       <!-- LIST -->
       <section class="list">
         <div id="items"></div>
@@ -248,7 +282,7 @@
             <input
               type="text"
               class="itemDescription"
-              placeholder="Make a biscuits..."
+              placeholder="Make a biscuit..."
             />
             <i class="fas fa-trash deleteItem"></i>
           </div>

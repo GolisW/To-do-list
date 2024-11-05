@@ -111,6 +111,44 @@ h1 {
   display: block;
 }
 
+/* Add item PopUP */
+.addTaskPopUp {
+  position: fixed;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 420px;
+  padding: 86px;
+  background-color: var(--2);
+  border-radius: 40px;
+  filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  z-index: 3;
+  overflow: hidden;
+}
+
+.addTaskPopUp p {
+  text-align: center;
+  font-family: "sniglet", sans-serif;
+  font-size: 32px;
+  color: var(--5);
+}
+
+.newTaskDescription {
+  flex-grow: 1;
+  padding: 8px 0 8px 12px;
+  width: 400px;
+  font-family: "sniglet", sans-serif;
+  font-size: 20px;
+  background-color: var(--6);
+  border-radius: 10px;
+  border-style: none;
+}
+
 .list {
   min-height: 55vh;
   width: 70vw;
@@ -141,10 +179,12 @@ h1 {
 .itemDescription {
   flex-grow: 1;
   padding: 8px 0 8px 12px;
+  text-align: left;
   width: 70%;
   font-family: "sniglet", sans-serif;
   font-size: 24px;
   background-color: var(--6);
+  color: var(--2);
   border-radius: 10px;
   border-style: none;
 }
@@ -212,7 +252,7 @@ h3 {
   flex-direction: column;
   align-items: center;
   gap: 48px;
-  top: 40%;
+  top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 900px;
@@ -239,7 +279,7 @@ h3 {
   flex-direction: column;
   align-items: center;
   gap: 86px;
-  top: 40%;
+  top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 900px;

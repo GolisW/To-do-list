@@ -14,129 +14,11 @@ function cleaning() {
 
   deleteCookie("token");
   deleteCookie("username");
+
+  localStorage.clear();
+
+  window.location.reload();
 }
-
-// ____________________WORKSHOP OPTIONS____________________
-
-// ADD ITEM
-let items = getItems();
-let filter = "all";
-
-function getItems() {
-  const value = localStorage.getItem("todo") || "[]";
-
-  return JSON.parse(value);
-}
-
-function setItems(items) {
-  const itemsJson = JSON.stringify(items);
-
-  localStorage.setItem("todo", itemsJson);
-}
-
-function addItem() {
-  items.unshift({
-    description: "",
-    completed: false,
-  });
-
-  setItems(items);
-  refreshList();
-}
-
-function updateItem(item, key, value) {
-  item[key] = value;
-
-  setItems(items);
-  refreshList();
-}
-
-// FILTERING ITEMS
-function refreshList() {
-  let filteredItems = items.filter((item) => {
-    if (filter === "completed") {
-      return item.completed;
-    } else if (filter === "notCompleted") {
-      return !item.completed;
-    } else {
-      return true;
-    }
-  });
-
-  // ALPHABETICAL SORTING ITEMS
-  filteredItems.sort((a, b) => {
-    if (a.completed) {
-      return 1;
-    }
-    if (b.completed) {
-      return -1;
-    }
-    return a.description.localeCompare(b.description);
-  });
-
-  // ITEM OPTIONS
-  const itemContainer = document.getElementById("items");
-  const itemTemplate = document.getElementById("itemTemplate");
-
-  itemContainer.innerHTML = "";
-
-  for (const item of filteredItems) {
-    const itemElement = itemTemplate.content.cloneNode(true);
-    const descriptionInput = itemElement.querySelector(".itemDescription");
-    const completedInput = itemElement.querySelector(".itemCompleted");
-    const deleteButton = itemElement.querySelector(".deleteItem");
-
-    descriptionInput.value = item.description;
-    completedInput.checked = item.completed;
-
-    descriptionInput.addEventListener("change", () => {
-      updateItem(item, "description", descriptionInput.value);
-    });
-
-    completedInput.addEventListener("change", () => {
-      updateItem(item, "completed", completedInput.checked);
-    });
-
-    deleteButton.addEventListener("click", () => {
-      items = items.filter((i) => i !== item);
-      setItems(items);
-      refreshList();
-    });
-
-    itemContainer.append(itemElement);
-  }
-}
-
-// SORT BUTTON
-const SORT_OPTIONS = document.querySelectorAll(".sortOption");
-
-SORT_OPTIONS.forEach((option) => {
-  option.addEventListener("click", (event) => {
-    const sortType = event.target.getAttribute("data-sort");
-    filter = sortType;
-    refreshList();
-  });
-});
-
-// ADD BUTTON
-const addButton = document.getElementById("add");
-
-addButton.addEventListener("click", () => {
-  addItem();
-});
-
-// DELETE ALL BUTTON
-const deleteButton = document.getElementById("delete");
-
-deleteButton.addEventListener("click", () => {
-  if (confirm("Are you sure you want to delete all items?")) {
-    localStorage.clear();
-    items = [];
-    refreshList();
-  }
-});
-
-refreshList();
 
 // ____________________OPEN/CLOSE POPUP____________________
 
@@ -165,7 +47,7 @@ document.querySelectorAll(".openPopup").forEach((button) => {
 // CLOSE ALL POPUPS
 function closeAllPopups() {
   const popups = document.querySelectorAll(
-    ".login, .signin, .deleteUserPopUp, .changeUsernamePopUp"
+    ".login, .signin, .deleteUserPopUp, .changeUsernamePopUp, .addTaskPopUp"
   );
 
   popups.forEach((popup) => {
@@ -196,6 +78,424 @@ function closePopupFog() {
 if (blurr) {
   blurr.addEventListener("click", closePopupFog);
 }
+
+// ____________________TO DO LIST____________________
+let items = [];
+
+// FETCH TASKS
+async function fetchTasks(userID, token) {
+  try {
+    const response = await fetch(
+      `http://localhost:5000/users/${userID}/getTasks`,
+      {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const tasks = await response.json();
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    items = tasks;
+
+    tasks.forEach(displayTask);
+  } catch (error) {
+    console.error("Error fetching tasks: ", error.message);
+  }
+}
+
+function setItems(tasks) {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+// ADD TASK
+const saveButton = document.getElementById("submitNewTask");
+const newTaskInput = document.getElementById("newTaskInput");
+
+saveButton.addEventListener("click", saveTask);
+newTaskInput.addEventListener("keydown", async (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    await saveTask();
+  }
+});
+
+async function saveTask() {
+  const input = newTaskInput.value.trim();
+  if (input === "") {
+    closeAllPopups();
+  } else {
+    await addTask(input);
+  }
+}
+
+async function addTask(description) {
+  // Token from cookie
+  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  const token = cookies["token"];
+
+  // UserID from token
+  const arrayToken = token.split(".");
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+  if (!tokenPayload.userID) {
+    console.error("No user ID found");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/users/${tokenPayload.userID}/add`,
+      {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          userID: tokenPayload.userID,
+          description: description,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const task = await response.json();
+
+    addTaskToLocalStorage(task);
+    displayTask(task);
+    document.getElementById("newTaskInput").value = "";
+    closeAllPopups();
+  } catch (error) {
+    console.error("Error while sending task:", error.message);
+    alert("An error occurred while adding a task. Please try again.");
+  }
+}
+
+// LIST DISPLAY
+function displayTask(task) {
+  const taskList = document.getElementById("items");
+
+  if (!taskList) {
+    console.error("Item ID 'items' not found.");
+    return;
+  }
+
+  const template = document.getElementById("itemTemplate");
+
+  if (!template) {
+    console.error("No template with ID 'itemTemplate' found.");
+    return;
+  }
+
+  const listItem = template.content.cloneNode(true);
+  const itemDescription = listItem.querySelector(".itemDescription");
+  const checkbox = listItem.querySelector(".itemCompleted");
+
+  itemDescription.value = task.description;
+  checkbox.checked = !!task.completed;
+
+  checkbox.addEventListener("change", () => {
+    const isCompleted = checkbox.checked ? 1 : 0;
+    updateTaskStatus(task.id, isCompleted);
+  });
+
+  itemDescription.addEventListener("change", () => {
+    const newDescription = itemDescription.value.trim();
+    if (newDescription) {
+      updateTaskDescription(task.id, newDescription);
+    }
+  });
+
+  listItem
+    .querySelector(".deleteItem")
+    .addEventListener("click", () => deleteTask(task.id));
+
+  // adding id to task
+  const itemElement = listItem.querySelector(".item");
+  itemElement.setAttribute("data-id", task.id);
+
+  taskList.appendChild(listItem);
+}
+
+// ADDING A TASK TO A LOCALSTORAGE
+function addTaskToLocalStorage(task) {
+  let tasks = JSON.parse(localStorage.getItem("tasks") || []);
+  tasks.push(task);
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+// UPDATE TASK STATUS
+async function updateTaskStatus(taskId, isCompleted) {
+  // Token from cookie
+  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  const token = cookies["token"];
+
+  // UserID from token
+  const arrayToken = token.split(".");
+
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+  if (!tokenPayload.userID) {
+    console.error("No user ID found");
+    return;
+  }
+
+  // local storage
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  tasks = tasks.map((task) => {
+    if (task.id === taskId) {
+      task.completed = isCompleted;
+    }
+    return task;
+  });
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/users/${tokenPayload.userID}/${taskId}/updateStatus`,
+      {
+        method: "PATCH",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({ completed: isCompleted }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Error updating task status:", error.message);
+  }
+}
+
+// UPDATE TASK DESCRIPTION
+function updateTaskDescription(taskId, newDescription) {
+  // Token from cookie
+  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  const token = cookies["token"];
+
+  // UserID from token
+  const arrayToken = token.split(".");
+
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+  if (!tokenPayload.userID) {
+    console.error("No user ID found");
+    return;
+  }
+
+  // local storage
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  tasks = tasks.map((task) => {
+    if (task.id === taskId) {
+      return { ...task, description: newDescription };
+    }
+    return task;
+  });
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  fetch(
+    `http://localhost:5000/users/${tokenPayload.userID}/${taskId}/updateDescription`,
+    {
+      method: "PUT",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify({ description: newDescription }),
+    }
+  )
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Update error: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((updatedTask) => {
+      console.log("Task updated:", updatedTask);
+    })
+    .catch((error) => {
+      console.error("Error while updating a task:", error);
+      alert("An error occurred while updating the task.");
+    });
+}
+
+// DELETE TASK
+async function deleteTask(taskId) {
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  tasks = tasks.filter((task) => task.id !== taskId);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  // Token from cookie
+  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  const token = cookies["token"];
+
+  // UserID from token
+  const arrayToken = token.split(".");
+
+  const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+  if (!tokenPayload.userID) {
+    console.error("No user ID found");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://localhost:5000/users/${tokenPayload.userID}/${taskId}/delete`,
+      {
+        method: "DELETE",
+        mode: "cors",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    // Aktualizacja widoku
+    const taskElement = document.querySelector(`.item[data-id="${taskId}"]`);
+    if (taskElement) {
+      taskElement.remove();
+    }
+  } catch (error) {
+    console.error("Error deleting task:", error.message);
+  }
+}
+
+// DELETE ALL BUTTON
+const deleteButton = document.getElementById("delete");
+
+deleteButton.addEventListener("click", async () => {
+  if (confirm("Are you sure you want to delete all items?")) {
+    // Token from cookie
+    let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+      const [key, value] = cookie.split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
+
+    const token = cookies["token"];
+
+    // UserID from token
+    const arrayToken = token.split(".");
+
+    const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+    if (!tokenPayload.userID) {
+      console.error("No user ID found");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/users/${tokenPayload.userID}/deleteAll`,
+        {
+          method: "DELETE",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const data = await response.text();
+      console.log(data);
+    } catch (error) {
+      console.error("Error deleting tasks:", error.message);
+    }
+
+    localStorage.clear();
+    items = [];
+    window.location.reload();
+  }
+});
+
+// SORT BUTTON
+const sortOptions = document.querySelectorAll(".sortOption");
+
+function getTasksFromLocalStorage() {
+  return JSON.parse(localStorage.getItem("tasks")) || [];
+}
+
+function displayFilteredTasks(tasks) {
+  const taskList = document.getElementById("items");
+  taskList.innerHTML = "";
+
+  tasks.forEach(displayTask);
+}
+
+function sortTasks(filter) {
+  const tasks = getTasksFromLocalStorage();
+
+  let filteredTasks = tasks;
+  if (filter === "completed") {
+    filteredTasks = tasks.filter((task) => task.completed === 1);
+  } else if (filter === "notCompleted") {
+    filteredTasks = tasks.filter((task) => task.completed === 0);
+  }
+
+  displayFilteredTasks(filteredTasks);
+}
+
+sortOptions.forEach((option) => {
+  option.addEventListener("click", () => {
+    const filter = option.getAttribute("data-sort");
+    sortTasks(filter);
+  });
+});
 
 // ____________________USER OPTIONS____________________
 
@@ -292,7 +592,7 @@ loginForm.addEventListener("submit", async (e) => {
 
     document.getElementById("unlogged").style.display = "none";
 
-    // Username from cookies
+    // Username and token from cookies
     const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
       const [key, value] = cookie.split("=");
       acc[key] = value;
@@ -302,6 +602,21 @@ loginForm.addEventListener("submit", async (e) => {
     const usernameFromCookie = cookies["username"] || "Unknown User";
     document.getElementById("h3username").innerText =
       "Hi " + usernameFromCookie + "!";
+
+    const token = cookies["token"];
+
+    // UserID from token
+    const arrayToken = token.split(".");
+
+    const tokenPayload = JSON.parse(atob(arrayToken[1]));
+
+    if (!tokenPayload.userID) {
+      console.error("No user ID found");
+      return;
+    }
+
+    // Tasks from database
+    await fetchTasks(tokenPayload.userID, token);
   } catch (error) {
     console.error("Login error: ", error.message);
   }
