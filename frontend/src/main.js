@@ -1,23 +1,63 @@
-// ____________________FRONTEND FUNCTIONS____________________
-// CLEANING COOKIES
-function cleaning() {
-  // Page change
-  document.getElementById("userProfile").style.display = "none";
-  document.getElementById("userProfileButton").style.display = "none";
+// ____________________FUNCTIONS____________________
 
-  document.getElementById("unlogged").style.display = "inline-block";
+function toggleDisplay(elementID, display) {
+  document.getElementById(elementID).style.display = display;
+}
 
-  // Remove cookies
-  function deleteCookie(name) {
-    document.cookie = name + "=; Max-Age=0; path=/";
+function clearUserData() {
+  toggleDisplay("userProfile", "none");
+  toggleDisplay("userProfileButton", "none");
+  toggleDisplay("unlogged", "flex");
+
+  function clearCookies(name) {
+    document.cookie = `${name}=; Max-Age=0; path=/`;
   }
 
-  deleteCookie("token");
-  deleteCookie("username");
-
+  clearCookies("token");
+  clearCookies("username");
   localStorage.clear();
-
   window.location.reload();
+}
+
+function getAuthData() {
+  const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = value;
+    return acc;
+  }, {});
+
+  const token = cookies["token"];
+  if (!token) return null;
+
+  try {
+    const { userID } = JSON.parse(atob(token.split(".")[1]));
+    return { userID, token };
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+function getCookies() {
+  return document.cookie.split("; ").reduce((acc, cookie) => {
+    const [key, value] = cookie.split("=");
+    acc[key] = decodeURIComponent(value);
+    return acc;
+  }, {});
+}
+
+function validateForm(fields) {
+  for (const field of fields) {
+    if (!field.value) {
+      console.error(`${field.name} cannot be empty`);
+      return false;
+    }
+  }
+  return true;
+}
+
+function handleError(error) {
+  console.error(error.message);
+  alert("An error occurred: " + error.message);
 }
 
 // ____________________OPEN/CLOSE POPUP____________________
@@ -70,7 +110,6 @@ document.querySelectorAll(".exit").forEach((button) => {
   button.addEventListener("click", closePopup);
 });
 
-// EXIT POPUP FOG
 function closePopupFog() {
   closeAllPopups();
 }
@@ -108,7 +147,7 @@ async function fetchTasks(userID, token) {
 
     tasks.forEach(displayTask);
   } catch (error) {
-    console.error("Error fetching tasks: ", error.message);
+    handleError(error);
   }
 }
 
@@ -138,55 +177,51 @@ async function saveTask() {
 }
 
 async function addTask(description) {
-  // Token from cookie
-  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-    const [key, value] = cookie.split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
+  const authData = getAuthData();
 
-  const token = cookies["token"];
-
-  // UserID from token
-  const arrayToken = token.split(".");
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-  if (!tokenPayload.userID) {
-    console.error("No user ID found");
+  if (!authData) {
+    console.error("Authentication data not found");
     return;
   }
 
+  const { userID, token } = authData;
+
   try {
-    const response = await fetch(
-      `http://localhost:5000/users/${tokenPayload.userID}/add`,
-      {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          userID: tokenPayload.userID,
-          description: description,
-        }),
-      }
-    );
+    const response = await fetch(`http://localhost:5000/users/${userID}/add`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        userID: userID,
+        description: description,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
 
-    const task = await response.json();
+    let task = null;
+    const responseText = await response.text();
+    if (responseText) {
+      task = JSON.parse(responseText);
+    } else {
+      console.warn("Received empty response from server.");
+    }
 
-    addTaskToLocalStorage(task);
-    displayTask(task);
+    if (task) {
+      addTaskToLocalStorage(task);
+      displayTask(task);
+    }
+
     document.getElementById("newTaskInput").value = "";
     closeAllPopups();
   } catch (error) {
-    console.error("Error while sending task:", error.message);
-    alert("An error occurred while adding a task. Please try again.");
+    handleError(error);
   }
 }
 
@@ -218,10 +253,20 @@ function displayTask(task) {
     updateTaskStatus(task.id, isCompleted);
   });
 
+  function debounce(func, delay) {
+    let debounceTimer;
+    return function (...args) {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func(...args), delay);
+    };
+  }
+
+  const debouncedUpdateTaskDescription = debounce(updateTaskDescription, 500);
+
   itemDescription.addEventListener("change", () => {
     const newDescription = itemDescription.value.trim();
     if (newDescription) {
-      updateTaskDescription(task.id, newDescription);
+      debouncedUpdateTaskDescription(task.id, newDescription);
     }
   });
 
@@ -246,24 +291,14 @@ function addTaskToLocalStorage(task) {
 
 // UPDATE TASK STATUS
 async function updateTaskStatus(taskId, isCompleted) {
-  // Token from cookie
-  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-    const [key, value] = cookie.split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
+  const authData = getAuthData();
 
-  const token = cookies["token"];
-
-  // UserID from token
-  const arrayToken = token.split(".");
-
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-  if (!tokenPayload.userID) {
-    console.error("No user ID found");
+  if (!authData) {
+    console.error("Authentication data not found");
     return;
   }
+
+  const { userID, token } = authData;
 
   // local storage
   let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -277,7 +312,7 @@ async function updateTaskStatus(taskId, isCompleted) {
 
   try {
     const response = await fetch(
-      `http://localhost:5000/users/${tokenPayload.userID}/${taskId}/updateStatus`,
+      `http://localhost:5000/users/${userID}/${taskId}/updateStatus`,
       {
         method: "PATCH",
         mode: "cors",
@@ -294,30 +329,20 @@ async function updateTaskStatus(taskId, isCompleted) {
       throw new Error(`Response status: ${response.status}`);
     }
   } catch (error) {
-    console.error("Error updating task status:", error.message);
+    handleError(error);
   }
 }
 
 // UPDATE TASK DESCRIPTION
 function updateTaskDescription(taskId, newDescription) {
-  // Token from cookie
-  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-    const [key, value] = cookie.split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
+  const authData = getAuthData();
 
-  const token = cookies["token"];
-
-  // UserID from token
-  const arrayToken = token.split(".");
-
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-  if (!tokenPayload.userID) {
-    console.error("No user ID found");
+  if (!authData) {
+    console.error("Authentication data not found");
     return;
   }
+
+  const { userID, token } = authData;
 
   // local storage
   let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
@@ -329,19 +354,16 @@ function updateTaskDescription(taskId, newDescription) {
   });
   localStorage.setItem("tasks", JSON.stringify(tasks));
 
-  fetch(
-    `http://localhost:5000/users/${tokenPayload.userID}/${taskId}/updateDescription`,
-    {
-      method: "PUT",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "include",
-      body: JSON.stringify({ description: newDescription }),
-    }
-  )
+  fetch(`http://localhost:5000/users/${userID}/${taskId}/updateDescription`, {
+    method: "PUT",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "include",
+    body: JSON.stringify({ description: newDescription }),
+  })
     .then((response) => {
       if (!response.ok) {
         throw new Error(`Update error: ${response.status}`);
@@ -363,28 +385,18 @@ async function deleteTask(taskId) {
   tasks = tasks.filter((task) => task.id !== taskId);
   localStorage.setItem("tasks", JSON.stringify(tasks));
 
-  // Token from cookie
-  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-    const [key, value] = cookie.split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
+  const authData = getAuthData();
 
-  const token = cookies["token"];
-
-  // UserID from token
-  const arrayToken = token.split(".");
-
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-  if (!tokenPayload.userID) {
-    console.error("No user ID found");
+  if (!authData) {
+    console.error("Authentication data not found");
     return;
   }
 
+  const { userID, token } = authData;
+
   try {
     const response = await fetch(
-      `http://localhost:5000/users/${tokenPayload.userID}/${taskId}/delete`,
+      `http://localhost:5000/users/${userID}/${taskId}/delete`,
       {
         method: "DELETE",
         mode: "cors",
@@ -405,7 +417,7 @@ async function deleteTask(taskId) {
       taskElement.remove();
     }
   } catch (error) {
-    console.error("Error deleting task:", error.message);
+    handleError(error);
   }
 }
 
@@ -414,28 +426,18 @@ const deleteButton = document.getElementById("delete");
 
 deleteButton.addEventListener("click", async () => {
   if (confirm("Are you sure you want to delete all items?")) {
-    // Token from cookie
-    let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-      const [key, value] = cookie.split("=");
-      acc[key] = value;
-      return acc;
-    }, {});
+    const authData = getAuthData();
 
-    const token = cookies["token"];
-
-    // UserID from token
-    const arrayToken = token.split(".");
-
-    const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-    if (!tokenPayload.userID) {
-      console.error("No user ID found");
+    if (!authData) {
+      console.error("Authentication data not found");
       return;
     }
 
+    const { userID, token } = authData;
+
     try {
       const response = await fetch(
-        `http://localhost:5000/users/${tokenPayload.userID}/deleteAll`,
+        `http://localhost:5000/users/${userID}/deleteAll`,
         {
           method: "DELETE",
           mode: "cors",
@@ -454,7 +456,7 @@ deleteButton.addEventListener("click", async () => {
       const data = await response.text();
       console.log(data);
     } catch (error) {
-      console.error("Error deleting tasks:", error.message);
+      handleError(error);
     }
 
     localStorage.clear();
@@ -474,7 +476,9 @@ function displayFilteredTasks(tasks) {
   const taskList = document.getElementById("items");
   taskList.innerHTML = "";
 
-  tasks.forEach(displayTask);
+  const fragment = document.createDocumentFragment();
+  tasks.forEach((task) => fragment.appendChild(createTaskElement(task)));
+  taskList.appendChild(fragment);
 }
 
 function sortTasks(filter) {
@@ -499,7 +503,7 @@ sortOptions.forEach((option) => {
 
 // ____________________USER OPTIONS____________________
 
-// ADD NEW USER - SIGNIN
+// ADD NEW USER
 let registerForm = document.getElementById("registerForm");
 
 registerForm.addEventListener("submit", async (e) => {
@@ -509,7 +513,7 @@ registerForm.addEventListener("submit", async (e) => {
   let email = document.getElementById("emailSignin");
   let password = document.getElementById("passwordSignin");
 
-  const url = "http://localhost:5000/users/createUser";
+  if (!validateForm([username, email, password])) return;
 
   try {
     const data = {
@@ -518,7 +522,7 @@ registerForm.addEventListener("submit", async (e) => {
       password: password.value,
     };
 
-    const response = await fetch(url, {
+    const response = await fetch("http://localhost:5000/users/createUser", {
       method: "POST",
       mode: "cors",
       headers: {
@@ -533,24 +537,16 @@ registerForm.addEventListener("submit", async (e) => {
       throw new Error(`Response status: ${response.status} - ${errorText}`);
     }
 
-    // Page change
-    document.getElementById("userProfile").style.display = "flex";
-    document.getElementById("userProfileButton").style.display = "flex";
+    toggleDisplay("userProfile", "flex");
+    toggleDisplay("userProfileButton", "flex");
+    toggleDisplay("unlogged", "none");
 
-    document.getElementById("unlogged").style.display = "none";
-
-    // Username from cookies
-    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-      const [key, value] = cookie.split("=");
-      acc[key] = value;
-      return acc;
-    }, {});
-
+    const cookies = getCookies();
     const usernameFromCookie = cookies["username"] || "Unknown User";
     document.getElementById("h3username").innerText =
       "Hi " + usernameFromCookie + "!";
   } catch (error) {
-    console.error("Error during registration: ", error.message);
+    handleError(error);
   }
   closeAllPopups();
 });
@@ -563,7 +559,7 @@ loginForm.addEventListener("submit", async (e) => {
   let email = document.getElementById("email");
   let password = document.getElementById("password");
 
-  const url = "http://localhost:5000/users/login";
+  if (!validateForm([email, password])) return;
 
   try {
     const data = {
@@ -571,7 +567,7 @@ loginForm.addEventListener("submit", async (e) => {
       password: password.value,
     };
 
-    const response = await fetch(url, {
+    const response = await fetch("http://localhost:5000/users/login", {
       method: "POST",
       mode: "cors",
       headers: {
@@ -586,19 +582,11 @@ loginForm.addEventListener("submit", async (e) => {
       throw new Error(`Response status: ${response.status} - ${errorText}`);
     }
 
-    // Page change
-    document.getElementById("userProfile").style.display = "flex";
-    document.getElementById("userProfileButton").style.display = "flex";
+    toggleDisplay("userProfile", "flex");
+    toggleDisplay("userProfileButton", "flex");
+    toggleDisplay("unlogged", "none");
 
-    document.getElementById("unlogged").style.display = "none";
-
-    // Username and token from cookies
-    const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-      const [key, value] = cookie.split("=");
-      acc[key] = value;
-      return acc;
-    }, {});
-
+    const cookies = getCookies();
     const usernameFromCookie = cookies["username"] || "Unknown User";
     document.getElementById("h3username").innerText =
       "Hi " + usernameFromCookie + "!";
@@ -618,7 +606,7 @@ loginForm.addEventListener("submit", async (e) => {
     // Tasks from database
     await fetchTasks(tokenPayload.userID, token);
   } catch (error) {
-    console.error("Login error: ", error.message);
+    handleError(error);
   }
   closeAllPopups();
 });
@@ -627,38 +615,25 @@ loginForm.addEventListener("submit", async (e) => {
 let deleteUserSubmit = document.getElementById("deleteUserSubmit");
 
 deleteUserSubmit.addEventListener("click", async () => {
-  // Token from cookie
-  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-    const [key, value] = cookie.split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
+  const authData = getAuthData();
 
-  const token = cookies["token"];
-
-  // UserID from token
-  const arrayToken = token.split(".");
-
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-  if (!tokenPayload.userID) {
-    console.error("No user ID found");
+  if (!authData) {
+    console.error("Authentication data not found");
     return;
   }
 
+  const { userID, token } = authData;
+
   try {
-    const response = await fetch(
-      `http://localhost:5000/users/${tokenPayload.userID}`,
-      {
-        method: "DELETE",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`http://localhost:5000/users/${userID}`, {
+      method: "DELETE",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    });
 
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -667,10 +642,10 @@ deleteUserSubmit.addEventListener("click", async () => {
     const data = await response.text();
     console.log(data);
   } catch (error) {
-    console.error("Error deleting user:", error.message);
+    handleError(error);
   }
   closeAllPopups();
-  cleaning();
+  clearUserData();
 });
 
 // CHANGE USERNAME
@@ -681,39 +656,26 @@ submitUsernameChange.addEventListener("click", async (e) => {
 
   let newUsername = document.getElementById("changeUsernameInput").value;
 
-  // Token from cookie
-  let cookies = document.cookie.split("; ").reduce((acc, cookie) => {
-    const [key, value] = cookie.split("=");
-    acc[key] = value;
-    return acc;
-  }, {});
+  const authData = getAuthData();
 
-  const token = cookies["token"];
-
-  // UserID from token
-  const arrayToken = token.split(".");
-
-  const tokenPayload = JSON.parse(atob(arrayToken[1]));
-
-  if (!tokenPayload.userID) {
-    console.error("No user ID found");
+  if (!authData) {
+    console.error("Authentication data not found");
     return;
   }
 
+  const { userID, token } = authData;
+
   try {
-    const response = await fetch(
-      `http://localhost:5000/users/${tokenPayload.userID}`,
-      {
-        method: "PATCH",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-        body: JSON.stringify({ username: newUsername }),
-      }
-    );
+    const response = await fetch(`http://localhost:5000/users/${userID}`, {
+      method: "PATCH",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+      body: JSON.stringify({ username: newUsername }),
+    });
 
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
@@ -724,7 +686,7 @@ submitUsernameChange.addEventListener("click", async (e) => {
 
     document.getElementById("h3username").innerText = "Hi " + newUsername + "!";
   } catch (error) {
-    console.error(error.message);
+    handleError(error);
   }
   closeAllPopups();
 });
@@ -735,5 +697,5 @@ let logoutButton = document.getElementById("logoutUser");
 logoutButton.addEventListener("click", async (e) => {
   e.preventDefault();
 
-  cleaning();
+  clearUserData();
 });
