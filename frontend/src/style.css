@@ -64,6 +64,16 @@ h1 {
   transition: 0.3s linear;
 }
 
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.disabled.sortDropdown {
+  pointer-events: none;
+}
+
 .workshop i {
   position: absolute;
   top: 50%;
@@ -111,7 +121,6 @@ h1 {
   display: block;
 }
 
-/* Add item PopUP */
 .addTaskPopUp {
   position: fixed;
   display: none;
@@ -150,6 +159,7 @@ h1 {
 }
 
 .list {
+  position: relative;
   min-height: 55vh;
   width: 70vw;
   max-width: 1000px;
@@ -159,6 +169,7 @@ h1 {
   background-color: var(--5);
   border-radius: 20px;
   filter: drop-shadow(0px 0px 10px rgb(180, 102, 78));
+  z-index: 2;
 }
 
 .item {
@@ -208,9 +219,9 @@ h1 {
 
 .cat {
   position: absolute;
-  top: 118px;
-  left: 310px;
-  z-index: -1;
+  top: -243px;
+  left: -153px;
+  z-index: 1;
 }
 
 /* USER PROFILE */
@@ -493,4 +504,184 @@ form {
   width: 100vw;
   height: 100vh;
   backdrop-filter: blur(8px);
+}
+
+@media (max-width: 1280px) {
+  h3 {
+    position: fixed;
+    top: 140px;
+    right: 65px;
+  }
+}
+
+@media (max-width: 1100px) {
+  h1 {
+    font-size: 80px;
+  }
+
+  h2 {
+    font-size: 48px;
+  }
+
+  .login {
+    width: 90vw;
+  }
+
+  .signin {
+    width: 90vw;
+  }
+
+  .loginCat {
+    display: none;
+  }
+
+  .changeUsernamePopUp {
+    width: 90vw;
+  }
+
+  .deleteUserPopUp {
+    width: 90vw;
+  }
+
+  .addTaskPopUp {
+    width: 90vw;
+  }
+}
+
+@media (max-width: 800px) {
+  h1 {
+    position: fixed;
+    font-size: 48px;
+    width: 200px;
+    text-align: left;
+    margin-left: 26px;
+  }
+
+  h3 {
+    position: static;
+  }
+
+  .userProfile .workshopButton {
+    margin: 4px;
+  }
+
+  .workshop {
+    padding: 50px 0;
+    text-align: center;
+  }
+
+  .workshopButton {
+    width: 48px;
+    height: 48px;
+    font-size: 12px;
+  }
+
+  .workshopButton:hover {
+    font-size: 18px;
+  }
+
+  .dropdonwContent {
+    left: 90px;
+    top: -35px;
+  }
+
+  .dropdonwContent.userProfileDropdown {
+    position: fixed;
+    top: 0;
+    left: auto;
+    right: 100px;
+    max-width: 150px;
+  }
+
+  .loginOpen {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    top: 50px;
+    right: 40px;
+  }
+
+  .list {
+    width: 90vw;
+    min-height: 60vh;
+    margin: 0px auto;
+    overflow: hidden;
+  }
+
+  .cat {
+    display: none;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .itemCompleted {
+    height: 20px;
+  }
+
+  .itemDescription {
+    font-size: 20px;
+  }
+
+  .deleteItem {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 630px) {
+  h1 {
+    position: relative;
+    font-size: 48px;
+    width: 200px;
+    text-align: left;
+    margin-left: 26px;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    font-size: 40px;
+  }
+
+  .loginOpen {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    top: 50px;
+    right: 40px;
+  }
+
+  .dropdonwContent.userProfileDropdown {
+    top: 20px;
+    right: 97px;
+  }
+
+  .workshop {
+    position: fixed;
+    bottom: 0;
+    padding: 20px 0;
+  }
+
+  .dropdonwContent {
+    left: 80px;
+    top: -60px;
+  }
+
+  .dropdonwContent button {
+    font-size: 12px;
+  }
+
+  .list {
+    width: 90vw;
+    min-height: 60vh;
+    margin: 0px auto;
+    overflow: hidden;
+  }
 }

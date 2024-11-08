@@ -586,6 +586,10 @@ loginForm.addEventListener("submit", async (e) => {
     toggleDisplay("userProfileButton", "flex");
     toggleDisplay("unlogged", "none");
 
+    document.getElementById("add").classList.remove("disabled");
+    document.getElementById("delete").classList.remove("disabled");
+    document.getElementById("sortButton").classList.remove("disabled");
+
     const cookies = getCookies();
     const usernameFromCookie = cookies["username"] || "Unknown User";
     document.getElementById("h3username").innerText =
@@ -696,6 +700,10 @@ let logoutButton = document.getElementById("logoutUser");
 
 logoutButton.addEventListener("click", async (e) => {
   e.preventDefault();
+
+  document.getElementById("add").classList.add("disabled");
+  document.getElementById("delete").classList.add("disabled");
+  document.getElementById("sortButton").classList.add("disabled");
 
   clearUserData();
 });

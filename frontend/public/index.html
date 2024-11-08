@@ -49,7 +49,7 @@
           </div>
         </div>
         <button
-          class="workshopButton openPopup"
+          class="workshopButton openPopup workshopButtonMobile"
           data-open="login"
           id="unlogged"
         >
@@ -220,16 +220,16 @@
       <!-- TO DO LIST BUTTONS -->
       <section class="workshop">
         <button
-          class="workshopButton openPopup"
+          class="workshopButton openPopup disabled"
           data-open="addTaskPopUp"
           id="add"
         >
           <i class="fa-solid fa-plus"></i>
         </button>
-        <button class="workshopButton" id="delete">
+        <button class="workshopButton disabled" id="delete">
           <i class="fas fa-trash"></i>
         </button>
-        <div class="sortDropdown">
+        <div class="sortDropdown disabled" id="sortButton">
           <button class="workshopButton" id="sort">
             <i class="fa-solid fa-list-ul"></i>
           </button>
@@ -287,11 +287,9 @@
             <i class="fas fa-trash deleteItem"></i>
           </div>
         </template>
+        <div class="cat"><img src="images/Cat.svg" alt="cute cat" /></div>
       </section>
     </main>
-
-    <!-- CAT -->
-    <div class="cat"><img src="images/Cat.svg" alt="cute cat" /></div>
 
     <!-- FOG ;) -->
     <div class="fog" id="fog"></div>
