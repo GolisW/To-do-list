@@ -7,7 +7,7 @@
 * [Setup](#setup)
 
 ## General info
-A responsive To-Do List application with user authentication and full CRUD (Create, Read, Update, Delete) functionality. This project allows users to manage their tasks effectively with features like sorting, marking tasks as complete, and more.
+A responsive To-Do List application with user authentication and full CRUD functionality. This project allows users to manage their tasks effectively with features like sorting, marking tasks as complete, and more.
 
 ## Technologies
 ### Backend
@@ -23,7 +23,7 @@ A responsive To-Do List application with user authentication and full CRUD (Crea
 
 ## Features
 ### General Features
-* User Authentication - Register and log in securely.
+* User Authentication - Register and login securely.
 * CRUD Operations - Create, view, edit, and delete tasks.
 * Task Status Management - Mark tasks as completed or pending.
 * Sorting - Sort tasks by completion status.
@@ -34,7 +34,7 @@ A responsive To-Do List application with user authentication and full CRUD (Crea
 * JWT Authentication for secure routes.
 * MySQL for database management.
 ### Frontend
-* Built with vanilla HTML, CSS and JavaScript.
+* Built with HTML, CSS and JavaScript.
 * Fully responsive design.
 
 ## Setup
@@ -64,13 +64,12 @@ JWT_SECRET="your_secret"
 * Run the database script:
 ```
 mysql -u root -p < create_database.sql
-
 ```
 * Start the backend server:
 ```
 npm start
 ```
 3. Frontend setup
-* Open frontend/public/index.html in your browser or deploy it to a static server.
+* Open your-directory-path/frontend/public/index.html in your browser or deploy it to a static server.
 
 ## Got questions or suggestions? Feel free to reach out! 🚀
