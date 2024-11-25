@@ -15,7 +15,7 @@ A responsive To-Do List application with user authentication and full CRUD (Crea
 * Node.js
 * Express.js
 * MySQL
-* JWT (JSON Web Tokens)
+* JWT
 ### Frontend
 * HTML
 * CSS
