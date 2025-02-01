@@ -5,6 +5,7 @@
 * [Technologies](#technologies)
 * [Features](#features)
 * [Setup](#setup)
+* [Screenshots](#screenshots)
 
 ## General info
 A responsive To-Do List application with user authentication and full CRUD functionality. This project allows users to manage their tasks effectively with features like sorting, marking tasks as complete, and more.
@@ -71,5 +72,15 @@ npm start
 ```
 3. Frontend setup
 * Open your-directory-path/frontend/public/index.html in your browser or deploy it to a static server.
+
+## Screenshots
+* Landing page
+![1](https://github.com/user-attachments/assets/5d49c96f-b633-4b83-9fae-08182385116d)
+* Login panel
+![2](https://github.com/user-attachments/assets/926263be-e6e7-4df0-913f-69c45073bd14)
+* Logged in user
+![3](https://github.com/user-attachments/assets/edaeeacd-20dc-490e-94d2-74d23e140f7b)
+* Task filter
+![4](https://github.com/user-attachments/assets/2888f41a-853f-4257-bb7b-616d3f9d7f8c)
 
 ## Got questions or suggestions? Feel free to reach out! 🚀
